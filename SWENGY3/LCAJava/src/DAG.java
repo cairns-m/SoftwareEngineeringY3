@@ -7,7 +7,7 @@ public class DAG {
 	private int E;						// number of edges
 	private ArrayList<Integer>[] adj;   // adjacency list for vertex 
 	private int [] indegree;			// indegree of vertex 
-	//private int [] outdegree;			// outdegree of vertex 
+	private int [] outdegree;			// outdegree of vertex 
 	private boolean marked [];			// list of the visited vertices
 	private boolean hasCycle;			// true if graph has a cycle
 	private boolean stack [];			
@@ -120,4 +120,96 @@ public class DAG {
 		}
 		stack[v] = false;
 	}
+    // implements lowest common ancestor
+	public int findLCA(int v, int w)
+	{
+		findCycle(0);
+		
+		if(hasCycle) 
+		{
+			return -1;
+		}
+		else if(validateVertex(v) < 0 || validateVertex(w) < 0)
+		{
+			return -1;
+		}
+		else if(E == 0)
+		{
+			return -1;
+		}
+		
+		DAG reverse = reverse();
+		
+		ArrayList<Integer> array1 = reverse.BFS(v);
+		ArrayList<Integer> array2 = reverse.BFS(w);
+		ArrayList<Integer> commonAncestors = new ArrayList<Integer>();
+		
+		boolean found = false;
+		
+		for(int i = 0; i < array1.size(); i++)
+		{
+			for(int j = 0; j < array2.size(); j++)
+			{
+				if(array1.get(i) == array2.get(j))
+				{
+					commonAncestors.add(array1.get(i));
+					found = true;
+				}
+			}
+		}
+		
+		if(found)
+		{
+			return commonAncestors.get(0);
+		}
+		else
+		{
+			return -1; 
+		}
+	}
+    	
+	// prints BFS from source 
+	public ArrayList<Integer> BFS(int s)
+	{
+		ArrayList<Integer> order = new ArrayList<Integer>();
+		boolean visited[] = new boolean[V]; 
+		LinkedList<Integer> queue = new LinkedList<Integer>();
+		
+		visited[s] = true;
+		queue.add(s);
+		
+		while(queue.size() != 0)
+		{
+			s = queue.poll(); 
+			order.add(s);
+			
+			Iterator<Integer> i = adj[s].listIterator();
+			
+			while(i.hasNext())
+			{
+				int n = i.next();
+				if(!visited[n])
+				{
+					visited[n] = true;
+					queue.add(n);
+				}
+			}
+		}
+		return order;
+	}
+	
+	// reverses DAG
+	public DAG reverse()
+	{
+		DAG reverse = new DAG(V);
+		for(int v = 0; v <V; v++)
+		{
+			for(int w : adj(v))
+			{
+				reverse.addEdge(w, v);
+			}		
+		}
+		return reverse;
+	}
+
 }
